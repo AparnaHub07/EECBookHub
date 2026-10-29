@@ -21,10 +21,16 @@ A student-to-student book sharing web application for Easwari Engineering Colleg
 - UPI penalty flow: borrower pays provider directly, submits UPI transaction reference, provider verifies receipt and confirms payment
 
 ## Run locally
-1. Install PostgreSQL and create the database `eecbookhub` (see `database/create-database.sql`).
-2. Set PostgreSQL credentials. For real OTP email, also set the SMTP values shown in `.env.example`.
-3. Run: `mvn spring-boot:run`
-4. Open: `http://localhost:8080`
+## How to Run the Project
+
+1. Install PostgreSQL and create the database `eecbookhub` using `database/create-database.sql`.
+2. Configure your PostgreSQL credentials in the application settings.
+3. For OTP email functionality, configure the SMTP settings using `.env.example`.
+4. Start the application using Maven:
+
+   
+   mvn spring-boot:run
+
 
 ## Production notes
 Use HTTPS in deployment and set `COOKIE_SECURE=true`. Never commit SMTP passwords or database passwords. For direct UPI, EEC BookHub does not hold student funds; the provider must verify the incoming payment before confirming it in the app.
