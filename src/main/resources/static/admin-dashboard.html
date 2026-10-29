@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — EEC BookHub</title>
+<link rel="icon" href="images/eec-logo.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="app-sidebar">
+    <div class="brand"><img src="images/eec-logo.png" class="badge" alt="EEC emblem"><span class="brand-name">EEC BookHub<small>Admin Console</small></span></div>
+    <nav class="flex-grow-1" id="adminNav">
+      <a href="#" class="side-link active" data-tab="overview"><span class="ic">📊</span>Overview</a>
+      <a href="#" class="side-link" data-tab="books"><span class="ic">📚</span>Manage Books</a>
+      <a href="#" class="side-link" data-tab="requests"><span class="ic">🔄</span>Borrow Requests</a>
+      <a href="#" class="side-link" data-tab="overdue"><span class="ic">⏰</span>Overdue & Penalties</a>
+      <a href="#" class="side-link" data-tab="payments"><span class="ic">💳</span>Payments</a>
+      <a href="#" class="side-link" data-tab="users"><span class="ic">🧑‍🎓</span>Manage Users</a>
+      <a href="#" class="side-link" data-tab="reviews"><span class="ic">⭐</span>Reviews</a>
+    </nav>
+    <div class="sidebar-foot">
+      <a href="dashboard.html" class="side-link"><span class="ic">↩️</span>Student View</a>
+      <a href="index.html" class="side-link"><span class="ic">🚪</span>Exit Admin</a>
+    </div>
+  </aside>
+  <div class="sidebar-scrim" id="sidebarScrim"></div>
+  <div class="app-main">
+    <header class="app-topbar">
+      <div class="d-flex align-items-center gap-2">
+        <button class="sidebar-toggle" id="sbToggle">☰</button>
+        <h3 class="mb-0" style="font-size:1.15rem;" id="adminTitle">Overview</h3>
+      </div>
+      <button class="theme-toggle" onclick="EEC.toggleTheme()">🌙</button>
+    </header>
+    <main class="app-content">
+
+      <section id="tab-overview">
+        <div class="row g-3 mb-3">
+          <div class="col-lg-2 col-md-4 col-6"><div class="stat-card accent-ink"><div class="stat-num" id="aStudents">0</div><div class="stat-label">Total Students</div></div></div>
+          <div class="col-lg-2 col-md-4 col-6"><div class="stat-card accent-spine"><div class="stat-num" id="aBooks">0</div><div class="stat-label">Total Books</div></div></div>
+          <div class="col-lg-2 col-md-4 col-6"><div class="stat-card accent-spine"><div class="stat-num" id="aAvail">0</div><div class="stat-label">Available Books</div></div></div>
+          <div class="col-lg-2 col-md-4 col-6"><div class="stat-card accent-ink"><div class="stat-num" id="aBorrowed">0</div><div class="stat-label">Active Borrowings</div></div></div>
+          <div class="col-lg-2 col-md-4 col-6"><div class="stat-card accent-overdue"><div class="stat-num" id="aOverdue">0</div><div class="stat-label">Overdue Books</div></div></div>
+          <div class="col-lg-2 col-md-4 col-6"><div class="stat-card accent-stamp"><div class="stat-num" id="aPenalty">₹0</div><div class="stat-label">Pending Penalties</div></div></div>
+        </div>
+        <div class="row g-3">
+          <div class="col-lg-7">
+            <div class="surface"><h3 class="surface-title">Books by category</h3><canvas id="catChart" height="220"></canvas></div>
+          </div>
+          <div class="col-lg-5">
+            <div class="surface"><h3 class="surface-title">Borrow status split</h3><canvas id="statusChart" height="220"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-books" class="d-none">
+        <div class="page-head"><h1 style="font-size:1.4rem;">Manage Books</h1><p>Monitor every listing and remove inappropriate posts.</p></div>
+        <div class="surface" style="padding:0; overflow-x:auto;">
+          <table class="table-ledger"><thead><tr><th>Title</th><th>Category</th><th>Provider</th><th>Condition</th><th>Status</th><th></th></tr></thead><tbody id="booksBody"></tbody></table>
+        </div>
+      </section>
+
+      <section id="tab-requests" class="d-none">
+        <div class="page-head"><h1 style="font-size:1.4rem;">Borrow Requests</h1><p>All requests raised across the platform.</p></div>
+        <div class="surface" style="padding:0; overflow-x:auto;">
+          <table class="table-ledger"><thead><tr><th>Book</th><th>Borrower</th><th>Provider</th><th>Requested</th><th>Status</th></tr></thead><tbody id="requestsBody"></tbody></table>
+        </div>
+      </section>
+
+      <section id="tab-overdue" class="d-none">
+        <div class="page-head"><h1 style="font-size:1.4rem;">Overdue & Penalties</h1><p>Books past their due date and the penalty accruing on each.</p></div>
+        <div class="surface" style="padding:0; overflow-x:auto;">
+          <table class="table-ledger"><thead><tr><th>Book</th><th>Borrower</th><th>Due Date</th><th>Days Late</th><th>Penalty</th></tr></thead><tbody id="overdueBody"></tbody></table>
+        </div>
+      </section>
+
+      <section id="tab-payments" class="d-none">
+        <div class="page-head"><h1 style="font-size:1.4rem;">Payments</h1><p>Penalty payments across all completed and pending transactions.</p></div>
+        <div class="surface" style="padding:0; overflow-x:auto;">
+          <table class="table-ledger"><thead><tr><th>Book</th><th>Borrower</th><th>Provider</th><th>Penalty</th><th>Status</th></tr></thead><tbody id="paymentsBody"></tbody></table>
+        </div>
+      </section>
+
+      <section id="tab-users" class="d-none">
+        <div class="page-head"><h1 style="font-size:1.4rem;">Manage Users</h1><p>Everyone registered with a verified college email.</p></div>
+        <div class="surface" style="padding:0; overflow-x:auto;">
+          <table class="table-ledger"><thead><tr><th>Name</th><th>Email</th><th>Department</th><th>Year</th><th>Books Provided</th></tr></thead><tbody id="usersBody"></tbody></table>
+        </div>
+      </section>
+
+      <section id="tab-reviews" class="d-none">
+        <div class="page-head"><h1 style="font-size:1.4rem;">Reviews</h1><p>All ratings and feedback submitted platform-wide.</p></div>
+        <div class="surface" style="padding:0; overflow-x:auto;">
+          <table class="table-ledger"><thead><tr><th>Book</th><th>Student</th><th>Rating</th><th>Comment</th></tr></thead><tbody id="reviewsBody"></tbody></table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+<div id="toastStack"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="js/script.js"></script>
+<script>
+EEC.seed(); EEC.initTheme(); EEC.requireAuth();
+
+document.getElementById('sbToggle').addEventListener('click', ()=>{
+  document.querySelector('.app-sidebar').classList.add('show');
+  document.getElementById('sidebarScrim').classList.add('show');
+});
+document.getElementById('sidebarScrim').addEventListener('click', ()=>{
+  document.querySelector('.app-sidebar').classList.remove('show');
+  document.getElementById('sidebarScrim').classList.remove('show');
+});
+
+document.querySelectorAll('#adminNav .side-link').forEach(link=>{
+  link.addEventListener('click', (e)=>{
+    e.preventDefault();
+    document.querySelectorAll('#adminNav .side-link').forEach(l=>l.classList.remove('active'));
+    link.classList.add('active');
+    document.querySelectorAll('main.app-content > section').forEach(s=> s.classList.add('d-none'));
+    document.getElementById('tab-'+link.dataset.tab).classList.remove('d-none');
+    document.getElementById('adminTitle').textContent = link.textContent.trim();
+  });
+});
+
+const users = EEC.read('eec_users', []);
+const books = EEC.getBooks();
+const requests = EEC.read('eec_requests', []);
+const borrowings = EEC.read('eec_borrowings', []);
+const reviews = EEC.read('eec_reviews', []);
+
+document.getElementById('aStudents').textContent = users.length;
+document.getElementById('aBooks').textContent = books.length;
+document.getElementById('aAvail').textContent = books.filter(b=>b.status==='Available').length;
+document.getElementById('aBorrowed').textContent = borrowings.filter(b=>b.status!=='Returned').length;
+document.getElementById('aOverdue').textContent = borrowings.filter(b=> EEC.computeDueStatus(b).label==='Overdue').length;
+document.getElementById('aPenalty').textContent = '₹' + borrowings.filter(b=>b.paymentStatus==='Pending').reduce((s,b)=>s+b.penalty,0);
+
+new Chart(document.getElementById('catChart'), {
+  type:'bar',
+  data:{ labels: EEC.CATEGORIES.map(c=>c.icon), datasets:[{ label:'Books', data: EEC.CATEGORIES.map(c=> books.filter(b=>b.category===c.key).length), backgroundColor:'#2F6B4F', borderRadius:6 }] },
+  options:{ plugins:{legend:{display:false}}, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+});
+new Chart(document.getElementById('statusChart'), {
+  type:'doughnut',
+  data:{ labels:['Available','Borrowed'], datasets:[{ data:[books.filter(b=>b.status==='Available').length, books.filter(b=>b.status==='Borrowed').length], backgroundColor:['#2F6B4F','#D9A441'] }] },
+  options:{ plugins:{ legend:{ position:'bottom' } } }
+});
+
+document.getElementById('booksBody').innerHTML = books.map(b=>{
+  const c = EEC.catInfo(b.category);
+  return `<tr><td><strong>${b.title}</strong><div class="input-hint">${b.author}</div></td><td>${c.icon} ${c.name.split(' ')[0]}</td><td>${b.providerName}</td><td>${b.condition}</td>
+  <td><span class="badge-status ${b.status==='Available'?'available':'borrowed'}">${b.status}</span></td>
+  <td><button class="btn btn-sm btn-outline-ink" onclick="removeBook('${b.id}', this)">Remove Listing</button></td></tr>`;
+}).join('');
+window.removeBook = function(id, btn){
+  EEC.confirmModal({ title:'Remove this listing?', body:'This will remove the book from EEC BookHub. This action is meant for inappropriate or duplicate listings.', confirmText:'Remove', confirmClass:'btn-overdue',
+    onConfirm:()=>{
+      EEC.deleteBook(id);
+      btn.closest('tr').remove();
+      EEC.toast('Listing removed.', 'success');
+    }});
+};
+
+document.getElementById('requestsBody').innerHTML = requests.length ? requests.map(r=>{
+  const book = EEC.getBook(r.bookId);
+  const cls = r.status==='Accepted'?'available':r.status==='Rejected'?'borrowed':'pending';
+  return `<tr><td>${book?book.title:'—'}</td><td>${r.borrowerName}</td><td>${book?book.providerName:'—'}</td><td>${EEC.fmtDate(r.requestDate)}</td><td><span class="badge-status ${cls}">${r.status}</span></td></tr>`;
+}).join('') : `<tr><td colspan="5" class="text-center text-muted-c py-4">No requests yet.</td></tr>`;
+
+const overdueRows = borrowings.filter(b=> EEC.computeDueStatus(b).label==='Overdue');
+document.getElementById('overdueBody').innerHTML = overdueRows.length ? overdueRows.map(b=>{
+  const book = EEC.getBook(b.bookId); const borrower = users.find(u=>u.id===b.borrowerId);
+  const ds = EEC.computeDueStatus(b);
+  return `<tr><td>${book.title}</td><td>${borrower?borrower.name:'—'}</td><td>${EEC.fmtDate(b.dueDate)}</td><td>${ds.days}</td><td>₹${EEC.calcPenalty(ds.days)}</td></tr>`;
+}).join('') : `<tr><td colspan="5" class="text-center text-muted-c py-4">No overdue books right now.</td></tr>`;
+
+const paymentRows = borrowings.filter(b=> b.paymentStatus!=='—');
+document.getElementById('paymentsBody').innerHTML = paymentRows.length ? paymentRows.map(b=>{
+  const book = EEC.getBook(b.bookId); const borrower = users.find(u=>u.id===b.borrowerId);
+  return `<tr><td>${book.title}</td><td>${borrower?borrower.name:'—'}</td><td>${book.providerName}</td><td>₹${b.penalty}</td><td><span class="badge-status ${b.paymentStatus==='Paid'?'available':'pending'}">${b.paymentStatus}</span></td></tr>`;
+}).join('') : `<tr><td colspan="5" class="text-center text-muted-c py-4">No payments recorded.</td></tr>`;
+
+document.getElementById('usersBody').innerHTML = users.map(u=>`<tr><td>${u.name}</td><td>${u.email}</td><td>${u.dept}</td><td>${u.year}</td><td>${books.filter(b=>b.providerId===u.id).length}</td></tr>`).join('');
+
+document.getElementById('reviewsBody').innerHTML = reviews.length ? reviews.map(r=>{
+  const book = EEC.getBook(r.bookId);
+  return `<tr><td>${book?book.title:'—'}</td><td>${r.userName}</td><td>${'⭐'.repeat(r.rating)}</td><td>${r.comment}</td></tr>`;
+}).join('') : `<tr><td colspan="4" class="text-center text-muted-c py-4">No reviews yet.</td></tr>`;
+</script>
+</body>
+</html>

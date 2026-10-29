@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Borrowed Books — EEC BookHub</title>
+<link rel="icon" href="images/eec-logo.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="app-sidebar" id="sidebarMount"></aside>
+  <div class="sidebar-scrim" id="sidebarScrim"></div>
+  <div class="app-main">
+    <header class="app-topbar" id="topbarMount"></header>
+    <main class="app-content">
+      <div class="page-head">
+        <h1>My Borrowed Books</h1>
+        <p>Track every book you currently have on loan, and request a renewal before the due date.</p>
+      </div>
+      <div class="surface" style="padding:0; overflow-x:auto;">
+        <table class="table-ledger" id="borrowedTable">
+          <thead><tr><th>Book</th><th>Provider & Contact</th><th>Pickup / Return At</th><th>Due Date</th><th>Days Remaining</th><th>Status</th><th></th></tr></thead>
+          <tbody id="borrowedBody"></tbody>
+        </table>
+        <div id="emptyBorrowed" class="empty-state d-none"><div class="e-icon">📖</div><h3 style="font-size:1.05rem;">You have no active borrowings</h3><p>Browse available books to borrow your first one.</p><a href="available-books.html" class="btn btn-spine">Browse Books</a></div>
+      </div>
+
+      <div class="page-head mt-5">
+        <h1 style="font-size:1.5rem;">Past borrow history</h1>
+      </div>
+      <div class="surface" style="padding:0; overflow-x:auto;">
+        <table class="table-ledger">
+          <thead><tr><th>Book</th><th>Borrow Date</th><th>Returned</th><th>Late Days</th><th>Penalty</th><th>Payment</th><th>Txn ID</th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+        <div id="emptyHistory" class="empty-state d-none"><div class="e-icon">📗</div>No completed borrows yet.</div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toastStack"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/script.js"></script>
+<script>
+const user = EEC.mountAppShell('borrowed', 'My Borrowed Books');
+if(user){
+  function render(){
+    const books = EEC.getBooks();
+    const borrowings = EEC.read('eec_borrowings', []).filter(b=> b.borrowerId===user.id);
+    const active = borrowings.filter(b=> b.status!=='Returned');
+    const past = borrowings.filter(b=> b.status==='Returned');
+
+    document.getElementById('borrowedBody').innerHTML = active.map(b=>{
+      const book = books.find(x=>x.id===b.bookId);
+      const provider = EEC.getBorrowingContact(b.id, 'provider');
+      const ds = EEC.computeDueStatus(b);
+      const dot = ds.label==='Overdue' ? '🔴' : ds.label==='Due Soon' ? '🟡' : '🟢';
+      return `<tr>
+        <td><strong>${book.title}</strong><div class="input-hint">${book.author}</div></td>
+        <td>${book.providerName}${provider?.visible ? `<div class="input-hint">📞 ${provider.phone}</div>` : ''}</td>
+        <td><div>Pickup: ${book.pickupLocation}</div><div class="input-hint">Return: ${book.returnLocation}</div></td>
+        <td>${EEC.fmtDate(b.dueDate)}</td>
+        <td>${ds.label==='Overdue' ? `${ds.days} day(s) overdue` : `${ds.days} day(s)`}</td>
+        <td><span class="badge-status ${ds.cls}">${dot} ${ds.label}</span></td>
+        <td><button class="btn btn-sm btn-outline-spine" onclick="renew('${b.id}')">Renew Request</button></td>
+      </tr>`;
+    }).join('');
+    document.getElementById('emptyBorrowed').classList.toggle('d-none', active.length>0);
+    document.getElementById('borrowedTable').classList.toggle('d-none', active.length===0);
+
+    document.getElementById('historyBody').innerHTML = past.map(b=>{
+      const book = books.find(x=>x.id===b.bookId);
+      return `<tr>
+        <td><strong>${book.title}</strong></td>
+        <td>${EEC.fmtDate(b.borrowDate)}</td>
+        <td>${EEC.fmtDate(b.returnDate)}</td>
+        <td>${b.lateDays}</td>
+        <td>${b.penalty ? '₹'+b.penalty : '₹0'}</td>
+        <td><span class="badge-status ${b.paymentStatus==='Paid' || b.paymentStatus==='—' ? 'available':'pending'}">${b.paymentStatus}</span></td>
+        <td class="input-hint">${b.transactionId || '—'}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('emptyHistory').classList.toggle('d-none', past.length>0);
+  }
+  window.renew = function(id){ EEC.requestRenewal(id); };
+  render();
+}
+</script>
+</body>
+</html>

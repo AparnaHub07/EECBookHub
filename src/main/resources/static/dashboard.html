@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — EEC BookHub</title>
+<link rel="icon" href="images/eec-logo.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="app-sidebar" id="sidebarMount"></aside>
+  <div class="sidebar-scrim" id="sidebarScrim"></div>
+  <div class="app-main">
+    <header class="app-topbar" id="topbarMount"></header>
+    <main class="app-content">
+
+      <div class="page-head" id="welcomeHead">
+        <h1>Welcome back 👋</h1>
+        <p>Here's what's happening with your books today.</p>
+      </div>
+
+      <div class="row g-3" id="statRow"></div>
+
+      <div class="row g-3 mt-1">
+        <div class="col-lg-8">
+          <div class="surface">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h3 class="surface-title mb-0">📅 Due date reminders</h3>
+              <a href="due-date.html" class="btn btn-sm btn-outline-spine">View all</a>
+            </div>
+            <div id="reminderList"></div>
+          </div>
+
+          <div class="surface mt-3">
+            <h3 class="surface-title">Quick actions</h3>
+            <div class="row g-3 mt-1">
+              <div class="col-md-4">
+                <a href="provide-book.html" class="ticket d-block text-center">
+                  <span class="t-icon">➕</span><div class="t-name">Provide a Book</div>
+                  <div class="t-count">List one of your own</div>
+                </a>
+              </div>
+              <div class="col-md-4">
+                <a href="search-books.html" class="ticket d-block text-center">
+                  <span class="t-icon">🔍</span><div class="t-name">Browse Books</div>
+                  <div class="t-count">Search all listings</div>
+                </a>
+              </div>
+              <div class="col-md-4">
+                <a href="my-borrowed-books.html" class="ticket d-block text-center">
+                  <span class="t-icon">📖</span><div class="t-name">My Requests</div>
+                  <div class="t-count">Track borrow status</div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="surface h-100">
+            <h3 class="surface-title">🔔 Latest notifications</h3>
+            <div id="notifPreview"></div>
+            <a href="notifications.html" class="btn btn-sm btn-outline-ink btn-block mt-2">View all notifications</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+          <h2 style="font-size:1.4rem;">Recently added books</h2>
+          <a href="available-books.html" class="btn btn-sm btn-outline-spine">Browse all</a>
+        </div>
+        <div class="row g-3 mt-1" id="recentGrid"></div>
+      </div>
+
+      <div class="mt-4">
+        <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+          <h2 style="font-size:1.4rem;">Most borrowed books</h2>
+        </div>
+        <div class="row g-3 mt-1" id="popularGrid"></div>
+      </div>
+
+      <div class="mt-4 mb-5">
+        <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+          <h2 style="font-size:1.4rem;">Recommended for you</h2>
+          <span class="input-hint">Based on categories you've browsed and borrowed</span>
+        </div>
+        <div class="row g-3 mt-1" id="recommendedGrid"></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div id="toastStack"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/script.js"></script>
+<script>
+const user = EEC.mountAppShell('home', 'Home');
+if(user){
+  document.getElementById('welcomeHead').querySelector('h1').textContent = 'Welcome back, ' + user.name.split(' ')[0] + ' 👋';
+
+  const books = EEC.getBooks();
+  const borrowings = EEC.read('eec_borrowings', []);
+  const requests = EEC.read('eec_requests', []);
+
+  const myBorrowed = borrowings.filter(b=> b.borrowerId===user.id && b.status!=='Returned');
+  const myProvided = books.filter(b=> b.providerId===user.id);
+  const pendingReq = requests.filter(r=> r.providerId===user.id && r.status==='Pending');
+  const penaltyPending = borrowings.filter(b=> b.borrowerId===user.id && b.paymentStatus==='Pending').reduce((s,b)=>s+b.penalty,0);
+  const availableCount = books.filter(b=>b.status==='Available').length;
+
+  const stats = [
+    { label:'Total Available Books', value: availableCount, icon:'📚', accent:'spine' },
+    { label:'My Borrowed Books', value: myBorrowed.length, icon:'📖', accent:'ink' },
+    { label:'Books I Provided', value: myProvided.length, icon:'➕', accent:'stamp' },
+    { label:'Pending Requests', value: pendingReq.length, icon:'⏳', accent:'stamp' },
+    { label:'Due Date Alerts', value: myBorrowed.filter(b=>EEC.computeDueStatus(b).label!=='Active').length, icon:'📅', accent:'overdue' },
+    { label:'Penalty Pending', value: '₹'+penaltyPending, icon:'💰', accent: penaltyPending>0?'overdue':'ink' }
+  ];
+  document.getElementById('statRow').innerHTML = stats.map(s=>`
+    <div class="col-lg-2 col-md-4 col-6">
+      <div class="stat-card accent-${s.accent}">
+        <div style="font-size:1.3rem;">${s.icon}</div>
+        <div class="stat-num">${s.value}</div>
+        <div class="stat-label">${s.label}</div>
+      </div>
+    </div>`).join('');
+
+  // Reminders
+  const reminderRows = myBorrowed.map(b=>({...b, ds: EEC.computeDueStatus(b), book: books.find(x=>x.id===b.bookId)}))
+    .filter(x=> x.ds.label!=='Active').sort((a,b)=> a.ds.days-b.ds.days);
+  document.getElementById('reminderList').innerHTML = reminderRows.length ? reminderRows.map(r=>`
+    <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom:1px solid var(--paper-line);">
+      <div>
+        <strong style="font-size:.92rem;">${r.book.title}</strong>
+        <div class="input-hint">${r.ds.label==='Overdue' ? `Overdue by ${r.ds.days} day(s) — due ${EEC.fmtDate(r.dueDate)}` : `Due in ${r.ds.days} day(s) — ${EEC.fmtDate(r.dueDate)}`}</div>
+      </div>
+      <span class="badge-status ${r.ds.cls}">${r.ds.label}</span>
+    </div>`).join('') : `<div class="empty-state py-3"><div class="e-icon">✅</div>No due-date alerts right now. You're all caught up.</div>`;
+
+  // Notifications preview
+  const notifs = EEC.read('eec_notifications',[]).filter(n=>n.userId===user.id).slice(0,4);
+  document.getElementById('notifPreview').innerHTML = notifs.length ? notifs.map(n=>`
+    <div class="notif-item ${n.read?'':'unread'}" style="padding:12px 0;">
+      <div class="notif-icon ${n.type==='overdue'?'danger':(n.type==='due'?'warn':'')}">${n.type==='overdue'?'🔴':n.type==='due'?'⏰':'🔔'}</div>
+      <div><div style="font-size:.86rem;">${n.message}</div><div class="input-hint">${EEC.fmtDate(n.date)}</div></div>
+    </div>`).join('') : `<div class="empty-state py-3"><div class="e-icon">🔔</div>No notifications yet.</div>`;
+
+  const emptyMsg = (text) => `<div class="col-12"><div class="empty-state"><div class="e-icon">📭</div>${text}</div></div>`;
+
+  const recent = [...books].sort((a,b)=> new Date(b.addedDate)-new Date(a.addedDate)).slice(0,4);
+  document.getElementById('recentGrid').innerHTML = recent.length ? recent.map(b=>`<div class="col-lg-3 col-md-6">${EEC.bookCardHTML(b)}</div>`).join('') : emptyMsg('No books listed yet — <a href="provide-book.html">provide the first one</a>.');
+
+  const popular = [...books].sort((a,b)=> b.borrowCount-a.borrowCount).slice(0,4);
+  document.getElementById('popularGrid').innerHTML = popular.length ? popular.map(b=>`<div class="col-lg-3 col-md-6">${EEC.bookCardHTML(b)}</div>`).join('') : emptyMsg('Most-borrowed titles will show up here once lending gets going.');
+
+  const recommended = [...books].filter(b=>b.status==='Available').sort(()=>0.5-Math.random()).slice(0,4);
+  document.getElementById('recommendedGrid').innerHTML = recommended.length ? recommended.map(b=>`<div class="col-lg-3 col-md-6">${EEC.bookCardHTML(b)}</div>`).join('') : emptyMsg('Recommendations appear once a few books are available to browse.');
+}
+</script>
+</body>
+</html>

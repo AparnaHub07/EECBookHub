@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reviews — EEC BookHub</title>
+<link rel="icon" href="images/eec-logo.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="app-sidebar" id="sidebarMount"></aside>
+  <div class="sidebar-scrim" id="sidebarScrim"></div>
+  <div class="app-main">
+    <header class="app-topbar" id="topbarMount"></header>
+    <main class="app-content">
+      <div class="page-head">
+        <h1>Reviews & Ratings</h1>
+        <p>Rate books you've borrowed and see what other students thought.</p>
+      </div>
+
+      <div class="surface mb-4">
+        <h3 class="surface-title">Write a review</h3>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Choose a book you've borrowed</label>
+            <select class="form-select" id="rBook"></select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Your rating</label>
+            <div class="star-input" id="starInput">
+              <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3"><label class="form-label">Your review</label><textarea class="form-control" id="rComment" rows="2" placeholder="How was the book and the borrowing experience?"></textarea></div>
+        <button class="btn btn-spine mt-3" id="submitReview">Submit Review</button>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 style="font-size:1.3rem;">All reviews</h2>
+      </div>
+      <div class="row g-3" id="reviewGrid"></div>
+    </main>
+  </div>
+</div>
+<div id="toastStack"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/script.js"></script>
+<script>
+const user = EEC.mountAppShell('reviews', 'Reviews & Ratings');
+if(user){
+  let rating = 0;
+  const books = EEC.getBooks();
+  const borrowedIds = new Set(EEC.read('eec_borrowings', []).filter(b=>b.borrowerId===user.id).map(b=>b.bookId));
+  const reviewableBooks = books.filter(b=>borrowedIds.has(b.id));
+  document.getElementById('rBook').innerHTML = reviewableBooks.map(b=> `<option value="${b.id}">${b.title} — ${b.author}</option>`).join('');
+
+  document.querySelectorAll('#starInput span').forEach(s=>{
+    s.addEventListener('click', ()=>{
+      rating = parseInt(s.dataset.v);
+      document.querySelectorAll('#starInput span').forEach(x=> x.classList.toggle('active', parseInt(x.dataset.v)<=rating));
+    });
+  });
+
+  document.getElementById('submitReview').addEventListener('click', ()=>{
+    const bookId = document.getElementById('rBook').value;
+    const comment = document.getElementById('rComment').value.trim();
+    if(!rating){ EEC.toast('Please select a star rating first.', 'warn'); return; }
+    if(!comment){ EEC.toast('Please write a short review.', 'warn'); return; }
+    const posted = EEC.addReview({ bookId, rating, comment });
+    if(!posted){ EEC.toast(EEC.getLastError() || 'Could not post review.', 'danger'); return; }
+    EEC.toast('Thanks — your review has been posted.', 'success');
+    document.getElementById('rComment').value = ''; rating = 0;
+    document.querySelectorAll('#starInput span').forEach(x=> x.classList.remove('active'));
+    renderReviews();
+  });
+
+  function renderReviews(){
+    const list = EEC.read('eec_reviews', []).sort((a,b)=> new Date(b.date)-new Date(a.date));
+    document.getElementById('reviewGrid').innerHTML = list.map(r=>{
+      const book = EEC.getBook(r.bookId);
+      return `<div class="col-md-6">
+        <div class="surface h-100">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <strong style="font-family:var(--font-display); font-size:1.02rem;">${book ? book.title : 'Untitled'}</strong>
+              <div class="input-hint">by ${r.userName}</div>
+            </div>
+            <span style="color:var(--stamp-dark); font-weight:700;">${'⭐'.repeat(r.rating)}</span>
+          </div>
+          <p style="margin-top:10px; font-size:.9rem;">${r.comment}</p>
+          <div class="input-hint">${EEC.fmtDate(r.date)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  renderReviews();
+}
+</script>
+</body>
+</html>

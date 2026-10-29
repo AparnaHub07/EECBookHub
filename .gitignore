@@ -1,0 +1,18 @@
+
+target/
+.idea/
+.vscode/
+*.iml
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Logs and generated files
+*.log
+data/
+
+# Local configuration
+application-local.properties
+application-local.yml

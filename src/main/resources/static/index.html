@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EEC BookHub — Share Books. Learn Together. Grow Together.</title>
+<link rel="icon" href="images/eec-logo.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-nav" id="siteNav"></header>
+
+<!-- HERO -->
+<section class="container-narrow" style="padding:64px 24px 40px;">
+  <div class="row align-items-center g-5">
+    <div class="col-lg-6">
+      <span class="pill-domain" style="margin-bottom:18px; display:inline-block;">Exclusively for Easwari Engineering College Students</span>
+      <h1 style="margin-top:16px;">Share Books. Learn Together. Grow Together.</h1>
+      <p class="lead" style="max-width:480px; margin-top:14px;">A smart student-to-student book sharing platform, built exclusively for Easwari Engineering College — borrow what you need this semester, lend what you've outgrown, and keep good books moving across campus.</p>
+      <div class="d-flex flex-wrap gap-2 mt-4">
+        <a href="register.html" class="btn btn-spine">Register with College Email</a>
+        <a href="available-books.html" class="btn btn-outline-ink">Explore Books</a>
+      </div>
+      <div class="d-flex gap-4 mt-5 flex-wrap" id="heroStats">
+        <div><div class="stat-num" style="font-size:1.6rem;" id="statBooks">—</div><div class="stat-label">Books in circulation</div></div>
+        <div><div class="stat-num" style="font-size:1.6rem;" id="statStudents">—</div><div class="stat-label">Students onboard</div></div>
+        <div><div class="stat-num" style="font-size:1.6rem;" id="statSaved">₹0</div><div class="stat-label">Saved via free borrowing</div></div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div style="position:relative; height:400px;">
+        <div style="position:absolute; width:78%; right:0; top:10px; transform:rotate(-3deg);" class="surface">
+          <div class="d-flex justify-content-between align-items-center mb-2"><strong style="font-family:var(--font-display)">Available Now</strong><span class="badge-status available">🟢 Available</span></div>
+          <div class="d-flex gap-3">
+            <div style="width:56px;height:78px;border-radius:5px;background:linear-gradient(135deg,#2F6B4F,#2F6B4Fcc);flex-shrink:0;"></div>
+            <div><strong style="font-family:var(--font-display); font-size:.95rem;">Clean Code</strong><div class="input-hint">Robert C. Martin · Good condition</div><div class="b-rating">⭐ 4.6 (12 reviews)</div></div>
+          </div>
+        </div>
+        <div style="position:absolute; width:70%; left:0; top:130px; transform:rotate(2deg);" class="surface">
+          <div class="d-flex justify-content-between align-items-center mb-2"><strong style="font-family:var(--font-display)">Due in 2 days</strong><span class="badge-status pending">🟡 Due Soon</span></div>
+          <p style="font-size:.83rem; margin:0;">"Strength of Materials" · Return or renew before the due date to avoid a late penalty.</p>
+        </div>
+        <div style="position:absolute; width:64%; right:6%; top:270px; transform:rotate(-1.5deg);" class="surface">
+          <div class="d-flex justify-content-between align-items-center"><strong style="font-family:var(--font-display)">Borrowing is free</strong></div>
+          <p style="font-size:.83rem; margin:6px 0 0;">Only late returns generate a penalty — paid directly to the book provider through UPI.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="container-narrow" style="padding:60px 24px;">
+  <div class="row g-5 align-items-start">
+    <div class="col-lg-5">
+      <h2>A book bank run by students, for students</h2>
+      <p class="mt-3">Every semester, good textbooks and novels sit unused after exams while other students go buy fresh copies. EEC BookHub turns that around — any Easwari student can lend a book they own, and any Easwari student can borrow it for free, directly from a classmate.</p>
+    </div>
+    <div class="col-lg-7">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="surface h-100"><h3 style="font-size:1.05rem;">📉 Lower expenses</h3><p style="font-size:.88rem; margin:0;">Borrow textbooks and reference material for free instead of buying new copies every semester.</p></div>
+        </div>
+        <div class="col-md-6">
+          <div class="surface h-100"><h3 style="font-size:1.05rem;">🌱 Sustainability</h3><p style="font-size:.88rem; margin:0;">Reusing books already on campus means fewer books printed, bought, and discarded.</p></div>
+        </div>
+        <div class="col-md-6">
+          <div class="surface h-100"><h3 style="font-size:1.05rem;">🤝 Student collaboration</h3><p style="font-size:.88rem; margin:0;">Connect with classmates from other departments and years through shared reading.</p></div>
+        </div>
+        <div class="col-md-6">
+          <div class="surface h-100"><h3 style="font-size:1.05rem;">🔒 Verified & exclusive</h3><p style="font-size:.88rem; margin:0;">Only verified student accounts can join, so it stays within the EEC community.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" style="background:var(--paper-card); border-top:1px solid var(--paper-line); border-bottom:1px solid var(--paper-line); padding:64px 0;">
+  <div class="container-narrow">
+    <h2>How it works</h2>
+    <p style="max-width:520px;">From listing a book to closing the loan, every step happens inside BookHub.</p>
+    <div class="row g-4 mt-3">
+      <div class="col-md-3 col-6">
+        <div class="surface h-100"><div style="font-size:1.6rem;">➕</div><h3 style="font-size:1rem; margin-top:10px;">1. Provide a book</h3><p style="font-size:.85rem; margin:0;">List a book you own with its condition, category and preferred duration.</p></div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="surface h-100"><div style="font-size:1.6rem;">🔍</div><h3 style="font-size:1rem; margin-top:10px;">2. Find & request</h3><p style="font-size:.85rem; margin:0;">Search by title, author or category, then send a borrow request in one tap.</p></div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="surface h-100"><div style="font-size:1.6rem;">✅</div><h3 style="font-size:1rem; margin-top:10px;">3. Owner approves</h3><p style="font-size:.85rem; margin:0;">The provider accepts or rejects — they always stay in control of their own book.</p></div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="surface h-100"><div style="font-size:1.6rem;">📅</div><h3 style="font-size:1rem; margin-top:10px;">4. Return on time</h3><p style="font-size:.85rem; margin:0;">A due date is set automatically — return on time for zero penalty, or renew ahead of it.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="container-narrow" style="padding:64px 24px;">
+  <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+    <div><h2>Browse by category</h2><p>Fifteen categories, from core engineering texts to weekend reads.</p></div>
+    <a href="available-books.html" class="btn btn-outline-spine btn-sm">View all books</a>
+  </div>
+  <div class="row g-3 mt-2" id="categoryGrid"></div>
+</section>
+
+<!-- RECENTLY ADDED -->
+<section style="background:var(--paper-card); border-top:1px solid var(--paper-line); border-bottom:1px solid var(--paper-line); padding:60px 0;">
+  <div class="container-narrow">
+    <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+      <div><h2>Recently added books</h2><p>Freshly listed by students across every department.</p></div>
+      <a href="available-books.html" class="btn btn-outline-spine btn-sm">Browse all</a>
+    </div>
+    <div class="row g-3 mt-2" id="recentGrid"></div>
+  </div>
+</section>
+
+<!-- MOST BORROWED -->
+<section class="container-narrow" style="padding:60px 24px;">
+  <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+    <div><h2>Most borrowed books</h2><p>The titles that keep circulating across EEC.</p></div>
+    <a href="available-books.html" class="btn btn-outline-spine btn-sm">See more</a>
+  </div>
+  <div class="row g-3 mt-2" id="popularGrid"></div>
+</section>
+
+<!-- BENEFITS -->
+<section style="background:var(--ink); padding:64px 0; color:var(--paper);">
+  <div class="container-narrow">
+    <h2 style="color:var(--paper);">Why students are switching to BookHub</h2>
+    <div class="row g-4 mt-2">
+      <div class="col-md-3 col-6">
+        <div class="stat-num" style="color:var(--stamp)">₹0</div><div class="stat-label" style="color:rgba(243,238,222,.7)">Cost to borrow a book</div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-num" style="color:var(--stamp)">15</div><div class="stat-label" style="color:rgba(243,238,222,.7)">Book categories covered</div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-num" style="color:var(--stamp)">2-day</div><div class="stat-label" style="color:rgba(243,238,222,.7)">Advance due-date reminder</div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-num" style="color:var(--stamp)">100%</div><div class="stat-label" style="color:rgba(243,238,222,.7)">Owner control over requests</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="container-narrow text-center" style="padding:70px 24px;">
+  <h2>Your bookshelf can help a classmate this semester</h2>
+  <p class="mx-auto" style="max-width:480px;">Sign in with your official college email to start lending and borrowing today.</p>
+  <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+    <a href="register.html" class="btn btn-spine">Create your account</a>
+    <a href="login.html" class="btn btn-outline-ink">I already have an account</a>
+  </div>
+</section>
+
+<footer class="site-footer" id="siteFooter"></footer>
+
+<div id="toastStack"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/script.js"></script>
+<script>
+EEC.mountPublicNav('About');
+EEC.mountFooter();
+
+function renderCategoryGrid(){
+  const grid = document.getElementById('categoryGrid');
+  const books = EEC.getBooks();
+  grid.innerHTML = EEC.CATEGORIES.map(c=>{
+    const count = books.filter(b=>b.category===c.key).length;
+    return `<div class="col-lg-3 col-md-4 col-6">
+      <a href="available-books.html?category=${c.key}" class="ticket d-block">
+        <span class="t-icon">${c.icon}</span>
+        <div class="t-name">${c.name}</div>
+        <div class="t-count">${count} book${count===1?'':'s'} available</div>
+      </a>
+    </div>`;
+  }).join('');
+}
+
+function renderBookRows(){
+  const books = EEC.getBooks();
+  document.getElementById('statBooks').textContent = books.length;
+  document.getElementById('statStudents').textContent = EEC.read('eec_users',[]).length;
+  document.getElementById('statSaved').textContent = '₹' + (books.length * 380).toLocaleString('en-IN');
+
+  const emptyMsg = (text) => `<div class="col-12"><div class="empty-state"><div class="e-icon">📭</div>${text}</div></div>`;
+
+  const recent = [...books].sort((a,b)=> new Date(b.addedDate)-new Date(a.addedDate)).slice(0,4);
+  document.getElementById('recentGrid').innerHTML = recent.length ? recent.map(b=>`<div class="col-lg-3 col-md-6">${EEC.bookCardHTML(b)}</div>`).join('') : emptyMsg("No books listed yet — be the first to provide one after logging in.");
+
+  const popular = [...books].sort((a,b)=> b.borrowCount-a.borrowCount).slice(0,4);
+  document.getElementById('popularGrid').innerHTML = popular.length ? popular.map(b=>`<div class="col-lg-3 col-md-6">${EEC.bookCardHTML(b)}</div>`).join('') : emptyMsg("Once books start circulating, the most-borrowed titles will appear here.");
+}
+
+renderCategoryGrid();
+renderBookRows();
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications — EEC BookHub</title>
+<link rel="icon" href="images/eec-logo.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="app-sidebar" id="sidebarMount"></aside>
+  <div class="sidebar-scrim" id="sidebarScrim"></div>
+  <div class="app-main">
+    <header class="app-topbar" id="topbarMount"></header>
+    <main class="app-content">
+      <div class="page-head d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div><h1>Notifications</h1><p>Borrow requests, due-date reminders, and payment updates all land here.</p></div>
+        <button class="btn btn-sm btn-outline-ink" id="markAllBtn">Mark all as read</button>
+      </div>
+      <div class="surface" style="padding:0;">
+        <div id="notifList"></div>
+        <div id="emptyNotif" class="empty-state d-none"><div class="e-icon">🔔</div>You're all caught up — no notifications.</div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toastStack"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/script.js"></script>
+<script>
+const user = EEC.mountAppShell('notifications', 'Notifications');
+if(user){
+  const iconMap = { request:'📥', accepted:'✅', rejected:'🚫', due:'⏰', overdue:'🔴', returned:'📗', payment:'💳', renewal:'🔄', review:'⭐' };
+  function render(){
+    const list = EEC.read('eec_notifications', []).filter(n=> n.userId===user.id).sort((a,b)=> new Date(b.date)-new Date(a.date));
+    document.getElementById('notifList').innerHTML = list.map(n=>`
+      <div class="notif-item ${n.read?'':'unread'}">
+        <div class="notif-icon ${n.type==='overdue'||n.type==='rejected'?'danger':(n.type==='due'?'warn':'')}">${iconMap[n.type]||'🔔'}</div>
+        <div class="flex-grow-1"><div style="font-size:.9rem;">${n.message}</div><div class="input-hint">${EEC.fmtDate(n.date)}</div></div>
+        ${!n.read ? `<button class="btn btn-sm btn-outline-ink" onclick="markRead('${n.id}')">Mark read</button>` : ''}
+      </div>`).join('');
+    document.getElementById('emptyNotif').classList.toggle('d-none', list.length>0);
+  }
+  window.markRead = function(id){
+    EEC.markNotificationRead(id); render();
+  };
+  document.getElementById('markAllBtn').addEventListener('click', ()=>{
+    EEC.markAllNotificationsRead(); render();
+    EEC.toast('All notifications marked as read.', 'success');
+  });
+  render();
+}
+</script>
+</body>
+</html>

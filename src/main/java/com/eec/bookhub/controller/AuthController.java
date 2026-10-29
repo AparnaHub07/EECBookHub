@@ -1,0 +1,5 @@
+package com.eec.bookhub.controller;
+import com.eec.bookhub.dto.AuthDtos.*;import com.eec.bookhub.service.AuthService;import jakarta.servlet.http.HttpSession;import jakarta.validation.Valid;import org.springframework.web.bind.annotation.*;import java.util.*;
+@RestController @RequestMapping("/api/auth")
+public class AuthController {private final AuthService auth;public AuthController(AuthService auth){this.auth=auth;}
+@PostMapping("/register") public Map<String,Object> register(@Valid @RequestBody RegisterRequest r,HttpSession s){return auth.register(r,s);} @PostMapping("/login") public Map<String,Object> login(@Valid @RequestBody LoginRequest r,HttpSession s){return auth.login(r,s);} @PostMapping("/logout") public Map<String,Object> logout(HttpSession s){s.invalidate();return Map.of("ok",true);} @GetMapping("/me") public Map<String,Object> me(HttpSession s){return auth.me(s);} @PostMapping("/forgot-password/request") public Map<String,Object> forgot(@Valid @RequestBody ForgotRequest r){return auth.requestOtp(r);} @PostMapping("/forgot-password/reset") public Map<String,Object> reset(@Valid @RequestBody ResetRequest r){return auth.reset(r);} }

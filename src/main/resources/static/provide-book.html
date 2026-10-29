@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Provide a Book — EEC BookHub</title>
+<link rel="icon" href="images/eec-logo.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="app-sidebar" id="sidebarMount"></aside>
+  <div class="sidebar-scrim" id="sidebarScrim"></div>
+  <div class="app-main">
+    <header class="app-topbar" id="topbarMount"></header>
+    <main class="app-content">
+      <div class="page-head">
+        <h1>Provide a Book</h1>
+        <p>List a book you own so another Easwari student can borrow it, free of cost.</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="surface">
+            <form id="provideForm">
+              <label class="form-label">Book Cover Image</label>
+              <div class="upload-drop mb-3" id="uploadDrop">
+                <div class="up-icon">📷</div>
+                <p class="mb-0" style="font-size:.88rem;">Click to upload a cover photo (optional) — a themed placeholder cover is used automatically otherwise.</p>
+                <input type="file" id="coverFile" accept="image/*" class="d-none">
+              </div>
+
+              <div class="row">
+                <div class="col-md-8 mb-3"><label class="form-label">Book Title</label><input type="text" class="form-control" id="fTitle" required placeholder="e.g. Design and Analysis of Algorithms"></div>
+                <div class="col-md-4 mb-3"><label class="form-label">ISBN (optional)</label><input type="text" class="form-control" id="fIsbn" placeholder="978-..."></div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3"><label class="form-label">Author Name</label><input type="text" class="form-control" id="fAuthor" required placeholder="e.g. S.K. Basu"></div>
+                <div class="col-md-6 mb-3"><label class="form-label">Category</label><select class="form-select" id="fCategory" required></select></div>
+              </div>
+              <div class="mb-3"><label class="form-label">Book Description</label><textarea class="form-control" id="fDesc" rows="3" required placeholder="Describe the book's content and any notes for the borrower"></textarea></div>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Book Condition</label>
+                  <select class="form-select" id="fCondition" required>
+                    <option>Excellent</option><option>Good</option><option>Used</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mb-3"><label class="form-label">Edition</label><input type="text" class="form-control" id="fEdition" placeholder="e.g. 4th Edition"></div>
+                
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Preferred Borrow Duration</label>
+                  <select class="form-select" id="fDuration" required>
+                    <option value="1">1 day</option>
+                    <option value="3">3 days</option>
+                    <option value="5">5 days</option>
+                    <option value="7">7 days</option>
+                    <option value="14" selected>14 days</option>
+                    <option value="21">21 days</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4 mb-3"><label class="form-label">Pickup Location</label><input type="text" class="form-control" id="fPickupLocation" required placeholder="e.g. CSE Block, Room 204"></div>
+                <div class="col-md-4 mb-3"><label class="form-label">Return Location</label><input type="text" class="form-control" id="fReturnLocation" required placeholder="e.g. Main Library Entrance"></div>
+                <div class="col-md-4 mb-3"><label class="form-label">Contact Number</label><input type="tel" class="form-control" id="fContactNumber" readonly><div class="input-hint">Taken from your profile.</div></div>
+              </div>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Availability Status</label>
+                  <select class="form-select" id="fStatus"><option>Available</option><option>Not Available</option></select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-spine btn-block mt-2">List This Book</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="surface mb-3">
+            <h3 class="surface-title">Incoming borrow requests</h3>
+            <div id="requestList"></div>
+          </div>
+          <div class="surface">
+            <h3 class="surface-title">Books you've provided</h3>
+            <div id="myBooksList"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="toastStack"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/script.js"></script>
+<script>
+const user = EEC.mountAppShell('provide', 'Provide a Book');
+if(user){
+  const catSel = document.getElementById('fCategory');
+  document.getElementById('fContactNumber').value = user.phone || '';
+
+  EEC.CATEGORIES.forEach(c=> catSel.insertAdjacentHTML('beforeend', `<option value="${c.key}">${c.icon} ${c.name}</option>`));
+
+  document.getElementById('uploadDrop').addEventListener('click', ()=> document.getElementById('coverFile').click());
+  document.getElementById('coverFile').addEventListener('change', function(){
+    if(this.files[0]) document.querySelector('#uploadDrop p').textContent = '✓ ' + this.files[0].name + ' selected';
+  });
+
+  function renderRequests(){
+    const requests = EEC.read('eec_requests', []).filter(r=> r.providerId===user.id && r.status==='Pending');
+    const books = EEC.getBooks();
+    document.getElementById('requestList').innerHTML = requests.length ? requests.map(r=>{
+      const book = books.find(b=>b.id===r.bookId);
+      return `<div class="py-3" style="border-bottom:1px solid var(--paper-line);">
+        <div class="d-flex justify-content-between">
+          <div>
+            <strong style="font-size:.9rem;">${book ? book.title : 'Untitled'}</strong>
+            <div class="input-hint">From ${r.borrowerName} · Requested ${EEC.fmtDate(r.requestDate)} · ${r.duration} days</div>
+          </div>
+        </div>
+        <div class="d-flex gap-2 mt-2">
+          <button class="btn btn-sm btn-spine" onclick="respond('${r.id}', true)">Accept</button>
+          <button class="btn btn-sm btn-outline-ink" onclick="respond('${r.id}', false)">Reject</button>
+        </div>
+      </div>`;
+    }).join('') : `<div class="empty-state py-3"><div class="e-icon">📥</div>No pending requests right now.</div>`;
+  }
+
+  window.respond = function(id, accept){
+    const res = EEC.respondRequest(id, accept);
+    if(res){ 
+      EEC.toast(accept ? 'Request accepted — due date has been set.' : 'Request rejected.', accept ? 'success':'warn'); 
+      renderRequests(); 
+      renderMyBooks(); 
+    }
+    else EEC.toast(EEC.getLastError() || 'Could not update the request.', 'danger');
+  };
+
+  function renderMyBooks(){
+    const books = EEC.getBooks().filter(b=> b.providerId===user.id);
+    const borrowings = EEC.read('eec_borrowings', []);
+    document.getElementById('myBooksList').innerHTML = books.length ? books.map(b=>{
+      const active = borrowings.find(bw=> bw.bookId===b.id && bw.status!=='Returned');
+      const borrower = active ? EEC.getBorrowingContact(active.id, 'borrower') : null;
+      return `<div class="py-3" style="border-bottom:1px solid var(--paper-line);">
+        <div class="d-flex justify-content-between align-items-start">
+          <div><strong style="font-size:.9rem;">${b.title}</strong><div class="input-hint">${b.author}</div></div>
+          <span class="badge-status ${b.status==='Available'?'available':'borrowed'}">${b.status}</span>
+        </div>
+        ${active ? `<div class="input-hint mt-1">Borrowed by ${borrower ? borrower.name : 'a student'} — due ${EEC.fmtDate(active.dueDate)}</div>
+        ${borrower?.visible ? `<div class="input-hint">📞 Contact borrower: <strong style="color:var(--text);">${borrower.phone}</strong></div>` : ''}` : ''}
+        <div class="d-flex align-items-center gap-2 mt-2">
+          <label class="input-hint mb-0">Availability:</label>
+          <select class="form-select form-select-sm" style="max-width:170px;" onchange="changeBookStatus('${b.id}', this.value)" ${active ? 'disabled' : ''}>
+            <option ${b.status==='Available'?'selected':''}>Available</option>
+            <option ${b.status==='Not Available'?'selected':''}>Not Available</option>
+          </select>
+          ${active ? `<span class="input-hint">Locked while borrowed</span>` : ''}
+        </div>
+      </div>`;
+    }).join('') : `<div class="empty-state py-3"><div class="e-icon">📚</div>You haven't listed any books yet.</div>`;
+  }
+
+  window.changeBookStatus = function(id, status){
+    const updated = EEC.updateBookStatus(id, status);
+    if(updated){ 
+      EEC.toast('Book availability changed to ' + updated.status + '.', 'success'); 
+      renderMyBooks(); 
+    }
+    else { 
+      EEC.toast(EEC.getLastError() || 'Could not change availability.', 'danger'); 
+      renderMyBooks(); 
+    }
+  };
+
+  document.getElementById('provideForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const newBook = {
+      title: document.getElementById('fTitle').value.trim(),
+      author: document.getElementById('fAuthor').value.trim(),
+      isbn: document.getElementById('fIsbn').value.trim(),
+      category: document.getElementById('fCategory').value,
+      description: document.getElementById('fDesc').value.trim(),
+      condition: document.getElementById('fCondition').value,
+      edition: document.getElementById('fEdition').value.trim() || 'Latest Edition',
+      duration: parseInt(document.getElementById('fDuration').value),
+      pickupLocation: document.getElementById('fPickupLocation').value.trim(),
+      returnLocation: document.getElementById('fReturnLocation').value.trim(),
+      status: document.getElementById('fStatus').value
+    };
+
+    const saved = EEC.createBook(newBook);
+    if(!saved){ 
+      EEC.toast(EEC.getLastError() || 'Could not list this book.', 'danger'); 
+      return; 
+    }
+
+    EEC.toast('"' + saved.title + '" is now listed on EEC BookHub.', 'success');
+    this.reset();
+    document.getElementById('fContactNumber').value = user.phone || '';
+    document.querySelector('#uploadDrop p').textContent = 'Click to upload a cover photo (optional) — a themed placeholder cover is used automatically otherwise.';
+    renderMyBooks();
+  });
+
+  renderRequests(); 
+  renderMyBooks();
+}
+</script>
+</body>
+</html>
